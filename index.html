@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI Study Assistant</title>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--p:#2563eb;--bg:#f8fafc;--sur:#fff;--tm:#111827;--ts:#6b7280;--bo:#e2e8f0;--r:16px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:'Inter',sans-serif;}
+body{background:var(--bg);color:var(--tm);display:flex;justify-content:center;min-height:100vh;}
+.wrap{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh;}
+#ls{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px;text-align:center;background:linear-gradient(160deg,#eff6ff,#f8fafc,#fef9c3);min-height:100vh;}
+.ll{font-size:3.2rem;margin-bottom:14px;}
+.lt{font-size:1.6rem;font-weight:700;color:var(--p);margin-bottom:8px;}
+.lsub{font-size:.9rem;color:var(--ts);margin-bottom:36px;line-height:1.6;}
+.lc{display:flex;flex-direction:column;gap:14px;width:100%;max-width:310px;}
+.lcard{background:#fff;border:2px solid var(--bo);border-radius:18px;padding:20px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+.lcard:active{transform:scale(.97);}
+.lcard.sel{border-color:var(--p);background:#eff6ff;}
+.lf{font-size:2.2rem;}.ln{font-size:1.1rem;font-weight:700;}.ld{font-size:.8rem;color:var(--ts);margin-top:3px;}
+.lb{width:100%;max-width:310px;background:#94a3b8;color:#fff;border:none;padding:15px;border-radius:13px;font-size:1rem;font-weight:700;cursor:pointer;transition:.3s;margin-top:24px;}
+.lb.on{background:var(--p);box-shadow:0 4px 14px rgba(37,99,235,.3);}
+#ma{display:none;flex-direction:column;flex:1;}
+.hdr{padding:14px 14px 8px;display:flex;justify-content:space-between;align-items:center;}
+.hdr h1{font-size:1.15rem;font-weight:700;flex:1;}
+.hsub{font-size:.72rem;color:var(--ts);}
+.hright{display:flex;gap:7px;align-items:center;}
+.badge{background:#eff6ff;color:var(--p);border:1px solid #bfdbfe;padding:6px 10px;border-radius:18px;font-size:.76rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.hbtn{background:#fff;border:1px solid var(--bo);border-radius:9px;padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;gap:4px;}
+.hbtn span{display:block;width:16px;height:2px;background:var(--tm);border-radius:2px;}
+.hpanel{position:fixed;top:0;right:-100%;width:82%;max-width:320px;height:100vh;background:#fff;z-index:1000;transition:right .3s;box-shadow:-4px 0 18px rgba(0,0,0,.1);display:flex;flex-direction:column;}
+.hpanel.open{right:0;}
+.hov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;}
+.hov.open{display:block;}
+.hph{padding:18px 14px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bo);}
+.hph h3{font-size:.95rem;font-weight:700;}
+.hcl{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--ts);}
+.hlist{flex:1;overflow-y:auto;padding:10px;}
+.hi{background:#f8fafc;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;border:1px solid var(--bo);}
+.hiq{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hit{font-size:.7rem;color:var(--ts);margin-top:3px;}
+.hemp{text-align:center;color:var(--ts);font-size:.88rem;padding:36px 0;}
+.hclr{margin:10px;padding:9px;border:1px solid #fca5a5;background:#fff;color:#dc2626;border-radius:9px;width:calc(100% - 20px);cursor:pointer;font-size:.82rem;font-weight:600;}
+.cnt{padding:0 14px 24px;flex:1;}
+.pills{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;margin-bottom:4px;scrollbar-width:none;}
+.pills::-webkit-scrollbar{display:none;}
+.pill{flex-shrink:0;padding:5px 12px;border-radius:28px;background:var(--sur);border:1px solid var(--bo);font-size:.82rem;font-weight:600;cursor:pointer;}
+.pill.act{background:var(--p);color:#fff;border-color:var(--p);}
+.card{background:var(--sur);border-radius:var(--r);padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.03);margin-bottom:14px;border:1px solid var(--bo);}
+.tabs{display:flex;gap:7px;margin-bottom:14px;}
+.tab{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid var(--bo);background:var(--sur);}
+.tab.act{background:var(--p);color:#fff;border-color:var(--p);}
+textarea{width:100%;border:1px solid var(--bo);background:#f8fafc;resize:none;font-size:.88rem;outline:none;line-height:1.5;padding:11px;border-radius:11px;color:var(--tm);}
+textarea::placeholder{color:#94a3b8;}
+#qt{height:108px;}#qc{height:56px;margin-bottom:10px;}
+.ubox{border:2px dashed #cbd5e1;border-radius:11px;padding:18px;text-align:center;position:relative;cursor:pointer;background:#f1f5f9;}
+.ubox input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.uicon{font-size:22px;margin-bottom:5px;}.utitle{font-size:.88rem;font-weight:600;}.usub{font-size:.72rem;color:var(--ts);margin-top:3px;}
+.iprev{display:none;position:relative;margin-top:10px;}
+.iprev img{width:100%;border-radius:11px;border:1px solid var(--bo);max-height:280px;object-fit:contain;background:#000;}
+.rmbtn{position:absolute;top:7px;right:7px;background:rgba(0,0,0,.6);color:#fff;border:none;width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;}
+.iloader{position:absolute;inset:0;background:rgba(248,250,252,.95);display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:11px;z-index:15;}
+.iloader.on{display:flex;}
+.ilspin{position:relative;width:30px;height:30px;}
+.ilspin .ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#4285F4;border-right-color:#DB4437;border-bottom-color:#F4B400;animation:spin 1s linear infinite;}
+.ilspin .sym{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:#5f6368;}
+.ilmsg{font-size:.8rem;color:#3c4043;font-weight:500;text-align:center;padding:0 10px;}
+.sbtn{width:100%;background:var(--p);color:#fff;border:none;padding:13px;border-radius:11px;font-size:.95rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;margin-bottom:14px;transition:.2s;}
+.sbtn:disabled{background:#94a3b8;cursor:not-allowed;}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1.15);opacity:1}}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.lw{display:none;align-items:center;gap:9px;margin:2px 0 14px;}
+.lw.on{display:flex;}
+.sw{position:relative;width:34px;height:34px;flex-shrink:0;}
+.gs{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#4285F4;border-right-color:#DB4437;border-bottom-color:#F4B400;animation:spin 1s cubic-bezier(.55,.15,.45,.85) infinite;}
+.is{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:900;color:#5f6368;animation:pulse 2s ease-in-out infinite;}
+.lt2{font-size:.85rem;color:#3c4043;font-weight:400;}
+.chat{margin-bottom:6px;}
+.qmsg{display:flex;justify-content:flex-end;margin-bottom:9px;}
+.qbub{background:#e3e3e3;color:#333;padding:9px 13px;border-radius:17px 17px 0 17px;font-size:.88rem;max-width:76%;word-break:break-word;line-height:1.5;}
+.aans{background:var(--sur);border-radius:var(--r);padding:14px;border:1px solid var(--bo);margin-bottom:10px;box-shadow:0 2px 7px rgba(0,0,0,.04);}
+.anh{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--bo);}
+.ant{font-weight:700;color:var(--p);font-size:.88rem;}
+.cbtn{font-size:.72rem;font-weight:600;color:var(--ts);background:var(--bg);border:none;padding:4px 9px;border-radius:7px;cursor:pointer;}
+.ans{font-size:.9rem;line-height:1.7;overflow-x:auto;}
+.ans h3{font-size:.95rem;font-weight:700;color:var(--p);margin:12px 0 7px;padding:5px 9px;background:#eff6ff;border-radius:7px;border-left:4px solid var(--p);}
+.ans .step{background:#f8fafc;padding:9px 11px;border-radius:9px;margin-bottom:7px;border-left:3px solid var(--p);}
+.ans ol{padding-left:18px;}
+.ans ol li{margin-bottom:7px;padding:7px 9px;background:#f8fafc;border-radius:7px;border-left:3px solid var(--p);list-style:decimal;}
+.feats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.feat{background:var(--sur);padding:14px;border-radius:var(--r);text-align:center;border:1px solid var(--bo);}
+.fi{font-size:22px;margin-bottom:8px;}.ft{font-size:.82rem;font-weight:700;margin-bottom:3px;}.fd{font-size:.72rem;color:var(--ts);line-height:1.3;}
+#st{text-align:center;font-size:.82rem;font-weight:600;color:var(--ts);margin-bottom:14px;display:none;word-break:break-word;}
+.err{color:#dc2626!important;background:#fee2e2;padding:11px;border-radius:7px;border:1px solid #fca5a5;}
+#cv{display:none;}
+
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- LANGUAGE SELECT -->
+<div id="ls">
+  <div class="ll">🎓</div>
+  <div class="lt">AI Study Assistant</div>
+  <div class="lsub">Apni bhasha chuniye<br>Choose your language</div>
+  <div class="lc">
+    <div class="lcard" id="chi" onclick="selL('hi')">
+      <div class="lf">🇮🇳</div>
+      <div><div class="ln">हिंदी</div><div class="ld">सभी जवाब हिंदी में मिलेंगे</div></div>
+    </div>
+    <div class="lcard" id="cen" onclick="selL('en')">
+      <div class="lf">🇬🇧</div>
+      <div><div class="ln">English</div><div class="ld">All answers in English</div></div>
+    </div>
+  </div>
+  <button class="lb" id="lbtn" onclick="startApp()">भाषा चुनें / Select Language</button>
+</div>
+
+<!-- HISTORY PANEL -->
+<div class="hov" id="hov" onclick="closeH()"></div>
+<div class="hpanel" id="hpanel">
+  <div class="hph"><h3 id="htitle">📜 History</h3><button class="hcl" onclick="closeH()">✕</button></div>
+  <div class="hlist" id="hlist"></div>
+  <button class="hclr" id="hclrbtn" onclick="clearH()">🗑️ Clear All</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="ma">
+  <div class="hdr">
+    <div>
+      <h1>AI Study Assistant</h1>
+      <div class="hsub" id="gr"></div>
+    </div>
+    <div class="hright">
+      <button class="badge" id="bdg" onclick="swLang()">🇮🇳 हिंदी</button>
+      <button class="hbtn" onclick="openH()"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="cnt">
+    <div class="pills" id="pills"></div>
+    <div class="card">
+      <div class="tabs">
+        <div class="tab act" id="tabT" onclick="setMode('text')">📝 Text</div>
+        <div class="tab" id="tabI" onclick="setMode('image')">📷 Image</div>
+      </div>
+      <div id="textMode"><textarea id="qt" placeholder=""></textarea></div>
+      <div id="imageMode" style="display:none">
+        <textarea id="qc" placeholder=""></textarea>
+        <div class="ubox" id="ubox">
+          <input type="file" accept="image/*" id="fi" onchange="handleImg(event)">
+          <div class="uicon">📸</div>
+          <div class="utitle" id="utitle">Upload Image</div>
+          <div class="usub" id="usub">Tap to choose</div>
+        </div>
+        <div class="iprev" id="iprev">
+          <button class="rmbtn" onclick="removeImg()">✕</button>
+          <img id="iimg" src="" alt="">
+          <div class="iloader" id="iloader">
+            <div class="ilspin"><div class="ring"></div><div class="sym">∞</div></div>
+            <div class="ilmsg" id="ilmsg">Processing...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="sbtn" id="sbtn" onclick="solve()">🚀 <span id="stxt">Solve</span></button>
+    <div class="lw" id="lw">
+      <div class="sw"><div class="gs"></div><div class="is">∞</div></div>
+      <span class="lt2" id="ltxt">Thinking...</span>
+    </div>
+    <div id="st"></div>
+    <div class="chat" id="chat"></div>
+    <div class="feats" id="feats">
+      <div class="feat"><div class="fi">🌐</div><div class="ft" id="f1t"></div><div class="fd" id="f1d"></div></div>
+      <div class="feat"><div class="fi">📖</div><div class="ft" id="f2t"></div><div class="fd" id="f2d"></div></div>
+      <div class="feat"><div class="fi">📷</div><div class="ft" id="f3t"></div><div class="fd" id="f3d"></div></div>
+      <div class="feat"><div class="fi">⚡</div><div class="ft" id="f4t"></div><div class="fd" id="f4d"></div></div>
+    </div>
+  </div>
+  <canvas id="cv"></canvas>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// RAPIDAPI KEY (hardcoded — browser mein kaam karta hai)
+// ═══════════════════════════════════════════════
+const RAPID_KEY = "2251d88dc4msh779d8f32853bc06p15750ejsn5c4b11e32228";
+
+// ── TEXT APIs — Claude 3.7 pehle, phir Gemini/GPT fallback ──
+const TEXT_APIS = [
+  {
+    name: "Claude 3.7 Sonnet",
+    url: "https://claude-3-7-sonnet.p.rapidapi.com/",
+    host: "claude-3-7-sonnet.p.rapidapi.com",
+    type: "openai",
+    body: (prompt) => ({
+      model: "claude-3-7-sonnet",
+      messages: [{ role: "user", content: prompt }]
+    })
+  },
+  {
+    name: "Gemini Flash 2.0",
+    url: "https://gemini-flash1.p.rapidapi.com/",
+    host: "gemini-flash1.p.rapidapi.com",
+    type: "openai",
+    body: (prompt) => ({ model: "gemini-2.0-flash", messages: [{ role: "user", content: prompt }] })
+  },
+  {
+    name: "Gemini 1.5 Flash",
+    url: "https://gemini-1-5-flash.p.rapidapi.com/",
+    host: "gemini-1-5-flash.p.rapidapi.com",
+    type: "openai",
+    body: (prompt) => ({ model: "gemini-1.5-flash", messages: [{ role: "user", content: prompt }] })
+  },
+  {
+    name: "Gemini 1.5 Pro",
+    url: "https://gemini-1-5-pro.p.rapidapi.com/",
+    host: "gemini-1-5-pro.p.rapidapi.com",
+    type: "openai",
+    body: (prompt) => ({ model: "gemini-2.5-pro", messages: [{ role: "user", content: prompt }] })
+  },
+  {
+    name: "ChatGPT",
+    url: "https://chatgpt-42.p.rapidapi.com/conversationgpt4-2",
+    host: "chatgpt-42.p.rapidapi.com",
+    type: "chatgpt",
+    body: (prompt) => ({
+      messages: [{ role: "user", content: prompt }],
+      system_prompt: "", temperature: 0.7, top_k: 5, top_p: 0.9,
+      max_tokens: 1200, web_access: false
+    })
+  },
+  {
+    name: "Gemini Pro",
+    url: "https://gemini-pro-ai.p.rapidapi.com/",
+    host: "gemini-pro-ai.p.rapidapi.com",
+    type: "gemini",
+    body: (prompt) => ({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+  }
+];
+
+// ── IMAGE APIs — Claude 3.7 pehle (base64 image support), phir Gemini/GPT ──
+const IMAGE_APIS = [
+  {
+    name: "Claude 3.7 Sonnet",
+    url: "https://claude-3-7-sonnet.p.rapidapi.com/",
+    host: "claude-3-7-sonnet.p.rapidapi.com",
+    type: "openai-img",
+    body: (prompt, img, mime) => ({
+      model: "claude-3-7-sonnet",
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image_url", image_url: { url: `data:${mime};base64,${img}` } },
+          { type: "text", text: prompt }
+        ]
+      }]
+    })
+  },
+  {
+    name: "Gemini Pro",
+    url: "https://gemini-pro-ai.p.rapidapi.com/",
+    host: "gemini-pro-ai.p.rapidapi.com",
+    type: "gemini-img",
+    body: (prompt, img, mime) => ({
+      contents: [{ role: "user", parts: [
+        { inlineData: { mimeType: mime, data: img } },
+        { text: prompt }
+      ]}]
+    })
+  },
+  {
+    name: "Gemini 1.5 Flash",
+    url: "https://gemini-1-5-flash.p.rapidapi.com/",
+    host: "gemini-1-5-flash.p.rapidapi.com",
+    type: "openai-img",
+    body: (prompt, img, mime) => ({
+      model: "gemini-1.5-flash",
+      messages: [{ role: "user", content: [
+        { type: "image_url", image_url: { url: `data:${mime};base64,${img}` } },
+        { type: "text", text: prompt }
+      ]}]
+    })
+  },
+  {
+    name: "Gemini 1.5 Pro",
+    url: "https://gemini-1-5-pro.p.rapidapi.com/",
+    host: "gemini-1-5-pro.p.rapidapi.com",
+    type: "openai-img",
+    body: (prompt, img, mime) => ({
+      model: "gemini-2.5-pro",
+      messages: [{ role: "user", content: [
+        { type: "image_url", image_url: { url: `data:${mime};base64,${img}` } },
+        { type: "text", text: prompt }
+      ]}]
+    })
+  },
+  {
+    name: "Gemini Flash 2.0",
+    url: "https://gemini-flash1.p.rapidapi.com/",
+    host: "gemini-flash1.p.rapidapi.com",
+    type: "openai-img",
+    body: (prompt, img, mime) => ({
+      model: "gemini-2.0-flash",
+      messages: [{ role: "user", content: [
+        { type: "image_url", image_url: { url: `data:${mime};base64,${img}` } },
+        { type: "text", text: prompt }
+      ]}]
+    })
+  },
+  {
+    name: "ChatGPT",
+    url: "https://chatgpt-42.p.rapidapi.com/conversationgpt4-2",
+    host: "chatgpt-42.p.rapidapi.com",
+    type: "chatgpt-img",
+    body: (prompt, img, mime) => ({
+      messages: [{ role: "user", content: [
+        { type: "image_url", image_url: { url: `data:${mime};base64,${img}`, detail: "auto" } },
+        { type: "text", text: prompt }
+      ]}],
+      system_prompt: "", temperature: 0.7, top_k: 5, top_p: 0.9,
+      max_tokens: 1500, web_access: false
+    })
+  }
+];
+
+// ── API CALLER ────────────────────────────────────────
+async function callAPI(api, bodyData, timeoutMs = 22000) {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+
+    // Claude-img ke liye special headers
+    const headers = {
+      "Content-Type": "application/json",
+      "x-rapidapi-host": api.host,
+      "x-rapidapi-key": RAPID_KEY
+    };
+
+    const r = await fetch(api.url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(bodyData),
+      signal: ctrl.signal
+    });
+    clearTimeout(t);
+
+    // Response text pehle lo — JSON parse fail ho sakta hai
+    const rawText = await r.text();
+    let d;
+    try { d = JSON.parse(rawText); }
+    catch(e) { throw new Error("Invalid JSON: " + rawText.substring(0,100)); }
+
+    if (!r.ok) throw new Error("HTTP " + r.status + " — " + (d.error?.message || d.message || rawText.substring(0,100)));
+
+    let res = "";
+    if (api.type === "gemini" || api.type === "gemini-img") {
+      res = d.candidates?.[0]?.content?.parts?.[0]?.text || d.text || "";
+    } else {
+      // OpenAI compatible format — Claude RapidAPI bhi yahi use karta hai
+      res = d.choices?.[0]?.message?.content || d.result || d.text || d.answer || "";
+    }
+
+    if (res && res.trim().length > 5) return res.trim();
+    throw new Error("Empty response from " + api.name);
+  } catch(e) {
+    console.warn(api.name + " failed:", e.message);
+    throw e;
+  }
+}
+
+// ── STRINGS ───────────────────────────────────────────
+const S = {
+  hi: {
+    badge:"🇮🇳 हिंदी", gr:"नमस्ते! 🙏", tabT:"📝 टेक्स्ट", tabI:"📷 फोटो",
+    stxt:"हल करो", utitle:"फोटो अपलोड करो", usub:"यहाँ टैप करो",
+    phT:"सवाल लिखो...\nजैसे: 2+2=? या Newton का पहला नियम?",
+    phI:"अतिरिक्त जानकारी (वैकल्पिक)...",
+    noQ:"❌ पहले सवाल लिखो।", noImg:"❌ पहले फोटो अपलोड करो।",
+    ansl:"✨ जवाब", copy:"कॉपी", copied:"✓ कॉपी!",
+    htitle:"📜 इतिहास", hclr:"🗑️ सब हटाओ", hemp:"कोई इतिहास नहीं",
+    li:"ONLY in Hindi (Devanagari). Clear and complete.",
+    ltxts:["सोच रहा है...","सोच रहा है...","सोच रहा है...","सोच रहा है..."],
+    pills:[["✨ Auto","Auto"],["📚 सामान्य","General"],["➕ गणित","Math"],["⚛️ Physics","Physics"],["🧪 Chemistry","Chemistry"],["🌿 Biology","Biology"],["🇮🇳 हिंदी","Hindi"],["🇬🇧 English","English"]],
+    feats:[["Claude + Gemini","सबसे Smart AI"],["सभी विषय","गणित, विज्ञान, आदि"],["फोटो सपोर्ट","फोटो खींचकर पूछो"],["6 APIs","Claude + Gemini + GPT"]]
+  },
+  en: {
+    badge:"🇬🇧 English", gr:"Welcome! 👋", tabT:"📝 Text", tabI:"📷 Image",
+    stxt:"Solve", utitle:"Upload Image", usub:"Tap to choose",
+    phT:"Type your question...\nExample: 2+2=? or Newton's first law?",
+    phI:"Extra details (optional)...",
+    noQ:"❌ Please type a question.", noImg:"❌ Please upload an image.",
+    ansl:"✨ Answer", copy:"Copy", copied:"✓ Copied!",
+    htitle:"📜 History", hclr:"🗑️ Clear All", hemp:"No history yet",
+    li:"ONLY in English. Clear and complete.",
+    ltxts:["Thinking...","Thinking...","Thinking...","Thinking..."],
+    pills:[["✨ Auto","Auto"],["📚 General","General"],["➕ Math","Math"],["⚛️ Physics","Physics"],["🧪 Chemistry","Chemistry"],["🌿 Biology","Biology"],["🇮🇳 Hindi","Hindi"],["🇬🇧 English","English"]],
+    feats:[["Claude + Gemini","Smartest AI combo"],["All Subjects","Math, Science, etc."],["Image Support","Upload & solve"],["6 APIs","Claude + Gemini + GPT"]]
+  }
+};
+
+let lang = localStorage.getItem("lang") || null;
+let selLang = null, mode = "text", img64 = null, imgMime = "image/jpeg";
+let hist = JSON.parse(localStorage.getItem("hist") || "[]");
+let ltimer = null;
+
+function selL(l) {
+  selLang = l;
+  ["hi","en"].forEach(x => document.getElementById("c"+x).classList.remove("sel"));
+  document.getElementById("c"+l).classList.add("sel");
+  const b = document.getElementById("lbtn");
+  b.textContent = l==="hi" ? "हिंदी में आगे बढ़ें →" : "Continue in English →";
+  b.classList.add("on");
+}
+
+function startApp() {
+  if (!selLang) { alert("Pehle language choose karo!"); return; }
+  lang = selLang;
+  localStorage.setItem("lang", lang);
+  showApp();
+}
+
+function showApp() {
+  document.getElementById("ls").style.display = "none";
+  document.getElementById("ma").style.display = "flex";
+  applyLang();
+}
+
+function applyLang() {
+  const s = S[lang];
+  document.getElementById("bdg").textContent = s.badge;
+  document.getElementById("gr").textContent = s.gr;
+  document.getElementById("tabT").textContent = s.tabT;
+  document.getElementById("tabI").textContent = s.tabI;
+  document.getElementById("stxt").textContent = s.stxt;
+  document.getElementById("utitle").textContent = s.utitle;
+  document.getElementById("usub").textContent = s.usub;
+  document.getElementById("qt").placeholder = s.phT;
+  document.getElementById("qc").placeholder = s.phI;
+  document.getElementById("htitle").textContent = s.htitle;
+  document.getElementById("hclrbtn").textContent = s.hclr;
+  s.feats.forEach((f,i) => {
+    document.getElementById("f"+(i+1)+"t").textContent = f[0];
+    document.getElementById("f"+(i+1)+"d").textContent = f[1];
+  });
+  const row = document.getElementById("pills"); row.innerHTML = "";
+  s.pills.forEach(([lbl], i) => {
+    const d = document.createElement("div");
+    d.className = "pill" + (i===0?" act":"");
+    d.textContent = lbl;
+    d.onclick = () => {
+      document.querySelectorAll(".pill").forEach(p => p.classList.remove("act"));
+      d.classList.add("act");
+    };
+    row.appendChild(d);
+  });
+}
+
+function swLang() { lang = lang==="hi"?"en":"hi"; localStorage.setItem("lang",lang); applyLang(); }
+
+function setMode(m) {
+  mode = m;
+  document.getElementById("tabT").classList.toggle("act", m==="text");
+  document.getElementById("tabI").classList.toggle("act", m==="image");
+  document.getElementById("textMode").style.display = m==="text"?"block":"none";
+  document.getElementById("imageMode").style.display = m==="image"?"block":"none";
+}
+
+function setSt(msg, err=false) {
+  const e = document.getElementById("st");
+  e.textContent = msg; e.style.display = msg?"block":"none";
+  e.className = err?"err":"";
+}
+
+function openH() { renderH(); document.getElementById("hpanel").classList.add("open"); document.getElementById("hov").classList.add("open"); }
+function closeH() { document.getElementById("hpanel").classList.remove("open"); document.getElementById("hov").classList.remove("open"); }
+function clearH() { hist = []; localStorage.setItem("hist", JSON.stringify(hist)); renderH(); }
+
+function saveH(q) {
+  const now = new Date();
+  hist.push({ q, t: now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" "+now.toLocaleDateString([],{day:"numeric",month:"short"}) });
+  if (hist.length > 50) hist.shift();
+  localStorage.setItem("hist", JSON.stringify(hist));
+}
+
+function renderH() {
+  const s = S[lang];
+  document.getElementById("htitle").textContent = s.htitle;
+  document.getElementById("hclrbtn").textContent = s.hclr;
+  const el = document.getElementById("hlist");
+  if (!hist.length) { el.innerHTML = `<div class="hemp">${s.hemp}</div>`; return; }
+  el.innerHTML = hist.slice().reverse().map((h,i) => `
+    <div class="hi" onclick="loadH(${hist.length-1-i})">
+      <div class="hiq">${h.q}</div><div class="hit">${h.t}</div>
+    </div>`).join("");
+}
+
+function loadH(i) { document.getElementById("qt").value = hist[i].q; closeH(); }
+
+function addChat(q, html, apiName) {
+  document.getElementById("feats").style.display = "none";
+  const s = S[lang];
+  const div = document.createElement("div");
+  const id = "a" + Date.now();
+  const apiTag = "";
+  div.innerHTML = `
+    <div class="qmsg"><div class="qbub">${q.replace(/</g,"&lt;")}</div></div>
+    <div class="aans">
+      <div class="anh">
+        <div class="ant">${s.ansl}${apiTag}</div>
+        <button class="cbtn" onclick="cp('${id}',this)">${s.copy}</button>
+      </div>
+      <div class="ans" id="${id}">${html}</div>
+    </div>`;
+  document.getElementById("chat").appendChild(div);
+  setTimeout(() => div.scrollIntoView({behavior:"smooth",block:"start"}), 100);
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+function cp(id, btn) {
+  const s = S[lang];
+  navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
+    btn.textContent = s.copied;
+    setTimeout(() => btn.textContent = s.copy, 2000);
+  });
+}
+
+function startSpin() {
+  const lw = document.getElementById("lw"), lt = document.getElementById("ltxt");
+  lw.classList.add("on");
+  lt.textContent = lang==="hi" ? "Thinking..." : "Thinking...";
+}
+
+function stopSpin() { clearInterval(ltimer); document.getElementById("lw").classList.remove("on"); }
+
+function showIL(on, msg) {
+  document.getElementById("iloader").classList.toggle("on", on);
+  if (msg) document.getElementById("ilmsg").textContent = msg;
+}
+
+// ── IMAGE COMPRESS ────────────────────────────────────
+function handleImg(e) {
+  const file = e.target.files[0]; if (!file) return;
+  img64 = null;
+  document.getElementById("ubox").style.display = "none";
+  document.getElementById("iprev").style.display = "block";
+  document.getElementById("iimg").src = "";
+  showIL(true, lang==="hi"?"Compress ho rahi hai...":"Compressing...");
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const im = new Image();
+    im.onload = () => {
+      const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+      let max=800, w=im.width, h=im.height;
+      if (w>h&&w>max) { h=Math.round(h*max/w); w=max; }
+      else if (h>max) { w=Math.round(w*max/h); h=max; }
+      cv.width=w; cv.height=h;
+      ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h);
+      ctx.drawImage(im,0,0,w,h);
+      // RapidAPI max ~4MB — 800KB safe limit rakhte hain
+      let q = 0.8;
+      let url = cv.toDataURL("image/jpeg", q);
+      // Compress karte raho jab tak size theek na ho
+      while (url.length > 1100000 && q > 0.15) {
+        q -= 0.1;
+        url = cv.toDataURL("image/jpeg", q);
+      }
+      img64 = url.split(",")[1];
+      imgMime = "image/jpeg";
+      document.getElementById("iimg").src = url;
+      const kb = Math.round(img64.length * 0.75 / 1024);
+      showIL(false, "");
+      setSt(lang==="hi" ? `✅ Image ready (${kb}KB) — Solve dabao` : `✅ Image ready (${kb}KB) — Press Solve`);
+    };
+    im.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImg() {
+  img64 = null;
+  document.getElementById("iprev").style.display = "none";
+  document.getElementById("ubox").style.display = "block";
+  document.getElementById("fi").value = "";
+  showIL(false,""); setSt("");
+}
+
+// ── PROMPTS ───────────────────────────────────────────
+function textPrompt(q, s) {
+  const isNum = /^\s*\d+[\.\)]/m.test(q);
+  const isLang = /\b(grammar|tense|noun|verb|vyakaran|sandhi|definition|define|meaning|arth|translate)\b/i.test(q);
+  const rule = isNum ? "Answer each numbered item in <ol><li>. Short direct answers." :
+               isLang ? "1-2 line definition + 1 example only." :
+               "Clear answer. Math: steps in <div class='step'>.";
+  return `You are an expert tutor. ${s.li}
+Question: "${q}"
+${rule}
+Reply ONLY in valid HTML. No markdown. No backticks. No apologies.`;
+}
+
+function imgPrompt(extra, s) {
+  return `You are an expert teacher. Carefully look at this image and solve ALL visible questions.
+${extra ? "Additional context: " + extra : ""}
+Instructions:
+- Answer EVERY question you see in the image
+- For Maths: show complete step-by-step solution
+- Use <h3> tags for headings
+- Wrap each answer in <div class="step">
+- ${s.li}
+- Keep answers clear and complete
+Output ONLY valid HTML. No markdown, no backticks, no explanation outside HTML.`;
+}
+
+// ── MAIN SOLVE ────────────────────────────────────────
+async function solve() {
+  const s = S[lang];
+  const tq = document.getElementById("qt").value.trim();
+  const iq = document.getElementById("qc").value.trim();
+  if (mode==="text" && !tq) { setSt(s.noQ, true); return; }
+  if (mode==="image" && !img64) { setSt(s.noImg, true); return; }
+
+  const btn = document.getElementById("sbtn");
+  btn.disabled = true; setSt("");
+  document.getElementById("feats").style.display = "none";
+  startSpin();
+
+  let html = "", q = "", usedApi = "";
+  const apis = mode==="image" ? IMAGE_APIS : TEXT_APIS;
+  const prompt = mode==="image" ? imgPrompt(iq, s) : textPrompt(tq, s);
+  q = mode==="image" ? (iq || (lang==="hi" ? "📷 फोटो से सवाल" : "📷 Image Question")) : tq;
+
+  for (let i = 0; i < apis.length; i++) {
+    const api = apis[i];
+
+    try {
+
+      const bodyData = mode==="image" ? api.body(prompt, img64, imgMime) : api.body(prompt);
+      html = await callAPI(api, bodyData, mode==="image" ? 35000 : 18000);
+      if (html.trim()) { usedApi = api.name; break; }
+    } catch(e) {
+      console.log(api.name + " failed:", e.message);
+    }
+  }
+
+  stopSpin();
+  btn.disabled = false;
+
+  if (!html || !html.trim()) {
+    setSt(lang==="hi"?"❌ Internet connection check karo aur dobara try karo।":"❌ Check your internet connection and try again.", true);
+    return;
+  }
+
+  html = html.replace(/```html/gi,"").replace(/```/g,"").trim();
+  addChat(q, html, usedApi);
+  saveH(q);
+  if (mode==="text") document.getElementById("qt").value = "";
+  else removeImg();
+}
+
+window.MathJax = { tex: { inlineMath:[["$","$"],["\\(","\\)"]], displayMath:[["$$","$$"],["\\[","\\]"]] } };
+
+// App start
+if (lang) showApp();
+else { document.getElementById("ls").style.display="flex"; document.getElementById("ma").style.display="none"; }
+</script>
+</body>
+</html>
